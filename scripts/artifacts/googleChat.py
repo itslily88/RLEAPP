@@ -132,13 +132,17 @@ def get_googleChat(files_found, report_folder, seeker, wrap_text):
             if 'attached_files' in chat_message:
                 if len(chat_message['attached_files']) == 0:
                     attachments = '' 
+                    ipAddr = ''
                 else:
                     attachments = chat_message['attached_files'][0].get('export_name','')
                     attachments = media_to_html(attachments, files_found, report_folder)
+                    ipAddr = (chat_message.get('upload_metadata', [{}])[0].get('backend_upload_metadata', {}).get('upload_ip')
+                              if chat_message.get('upload_metadata') else '')
             else: 
                 attachments = ''
-            data_list.append((datetime_stamp,sender_name,sender_email,sender_user_type,members_html,message_text,attachments))
-            data_list_tsv.append((datetime_stamp,sender_name,sender_email,sender_user_type,members_tsv,message_text_tsv,attachments,))
+                ipAddr = ''
+            data_list.append((datetime_stamp,sender_name,sender_email,sender_user_type,members_html,message_text,attachments,ipAddr))
+            data_list_tsv.append((datetime_stamp,sender_name,sender_email,sender_user_type,members_tsv,message_text_tsv,attachments,ipAddr))
     
     
     directory = os.path.dirname(file_found)
@@ -147,7 +151,7 @@ def get_googleChat(files_found, report_folder, seeker, wrap_text):
         report = ArtifactHtmlReport('Google Chat - Messages')
         report.start_artifact_report(report_folder, 'Google Chat - Messages')
         report.add_script()
-        data_headers = ('Created Timestamp','Sender Name','Sender Email','Sender Type','Group Members','Message','Attachment')
+        data_headers = ('Created Timestamp','Sender Name','Sender Email','Sender Type','Group Members','Message','Attachment','IP Address')
 
         report.write_artifact_data_table(data_headers, data_list, directory, html_no_escape=['Group Members','Attachment'])
         report.end_artifact_report()
